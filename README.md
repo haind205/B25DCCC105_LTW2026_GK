@@ -1,32 +1,40 @@
-# React + TypeScript + Vite
+# MiniBlog
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+MiniBlog là ứng dụng blog xây dựng bằng React, TypeScript và Vite.
 
-Currently, two official plugins are available:
+## Chức năng
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Hiển thị, tìm kiếm và phân trang bài viết từ JSONPlaceholder.
+- Mở trang chi tiết bài viết, xem và gửi bình luận.
+- Đăng ký, đăng nhập và đăng xuất.
+- Tài khoản đã đăng nhập có thể tạo bài viết.
+- Lưu tài khoản, bài viết và bình luận trên trình duyệt bằng localStorage.
+- Hỗ trợ trang 404 và điều hướng bằng React Router.
 
-## React Compiler
+## Chạy trên máy
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Cài các gói cần thiết:
 
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm install
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+Khởi động môi trường phát triển:
+
+```bash
+npm run dev
+```
+
+Kiểm tra bản build:
+
+```bash
+npm run build
+```
+
+Trên Windows PowerShell, nếu lệnh `npm` bị chặn, dùng `npm.cmd` thay thế.
+
+## Triển khai
+
+Dự án được cấu hình cho GitHub Pages:
+
+https://haind205.github.io/B25DCCC105_LTW2026_GK/

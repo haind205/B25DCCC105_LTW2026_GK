@@ -1,4 +1,5 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { Link, Route, Routes, useNavigate, useParams } from 'react-router'
 import './App.css'
 
 type Post = { id: number; title: string; body: string }
@@ -54,7 +55,10 @@ function readSavedComments(): SavedComment[] {
   }
 }
 
-function App() {
+function BlogApp() {
+  const navigate = useNavigate()
+  const { postId } = useParams()
+  const routeInitialized = useRef(false)
   const [posts, setPosts] = useState<Post[]>([])
   const [localPosts, setLocalPosts] = useState<Post[]>(readSavedPosts)
   const [loading, setLoading] = useState(true)
@@ -68,8 +72,8 @@ function App() {
   const [commentFormError, setCommentFormError] = useState('')
   const [commentsLoading, setCommentsLoading] = useState(false)
   const [commentsError, setCommentsError] = useState('')
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [username, setUsername] = useState('')
+  const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('miniblog-authenticated') === 'true')
+  const [username, setUsername] = useState(() => localStorage.getItem('miniblog-username') ?? '')
   const [password, setPassword] = useState('')
   const [loginError, setLoginError] = useState('')
   const [showRegister, setShowRegister] = useState(false)
@@ -80,7 +84,30 @@ function App() {
   const [formError, setFormError] = useState('')
   const [formSuccess, setFormSuccess] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
-  const canWritePosts = isLoggedIn && username === 'admin'
+  const canWritePosts = isLoggedIn
+
+  useEffect(() => {
+    if (postId) {
+      if (!routeInitialized.current) {
+        const routePost = [...localPosts, ...posts].find((post) => post.id === Number(postId))
+        if (routePost) {
+          setSelectedPost(routePost)
+          routeInitialized.current = true
+        } else if (!loading) {
+          routeInitialized.current = true
+          navigate('/')
+        }
+      } else if (!selectedPost) {
+        navigate('/')
+      }
+      return
+    }
+
+    routeInitialized.current = true
+    if (selectedPost) {
+      navigate(`/posts/${selectedPost.id}`)
+    }
+  }, [postId, localPosts, posts, loading, selectedPost, navigate])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -158,6 +185,8 @@ function App() {
     const matchingAccount = readAccounts().find((account) => account.username.toLocaleLowerCase() === normalizedUsername.toLocaleLowerCase() && account.password === password)
     if ((normalizedUsername === 'admin' && password === '123456') || matchingAccount) {
       setIsLoggedIn(true)
+      localStorage.setItem('miniblog-authenticated', 'true')
+      localStorage.setItem('miniblog-username', normalizedUsername)
       setLoginError('')
       setPassword('')
     } else {
@@ -190,6 +219,8 @@ function App() {
       localStorage.setItem(ACCOUNTS_KEY, JSON.stringify([...accounts, { username: normalizedUsername, password }]))
       setIsLoggedIn(true)
       setUsername(normalizedUsername)
+      localStorage.setItem('miniblog-authenticated', 'true')
+      localStorage.setItem('miniblog-username', normalizedUsername)
       setPassword('')
       setConfirmPassword('')
     } catch {
@@ -199,6 +230,8 @@ function App() {
 
   const handleLogout = () => {
     setIsLoggedIn(false)
+    localStorage.removeItem('miniblog-authenticated')
+    localStorage.removeItem('miniblog-username')
     setShowRegister(false)
     setUsername('')
     setPassword('')
@@ -259,7 +292,10 @@ function App() {
     }
   }
 
-  if (window.location.pathname !== '/') {
+  const normalizedPath = window.location.pathname.replace(/\/$/, '');
+  const isHomePage = normalizedPath === '' || normalizedPath === '/B25DCCC105_LTW2026_GK';
+
+  if (!isHomePage) {
     return (
       <main className="site-frame not-found-frame">
         <section className="not-found">
@@ -463,6 +499,28 @@ function App() {
 
       <footer className="site-footer"><a className="brand" href="/">MiniBlog</a><span>Đọc · Viết · Chia sẻ</span><a href="#about">Lên đầu trang ↑</a></footer>
     </main>
+  )
+}
+
+function NotFoundPage() {
+  return (
+    <main className="not-found-page">
+      <p>MINIBLOG</p>
+      <h1>404</h1>
+      <h2>Không tìm thấy trang</h2>
+      <p>Đường dẫn này không tồn tại hoặc đã được thay đổi.</p>
+      <Link to="/">Về trang chủ</Link>
+    </main>
+  )
+}
+
+function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<BlogApp />} />
+      <Route path="/posts/:postId" element={<BlogApp />} />
+      <Route path="*" element={<NotFoundPage />} />
+    </Routes>
   )
 }
 
